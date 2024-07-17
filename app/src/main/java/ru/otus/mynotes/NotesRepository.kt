@@ -1,28 +1,35 @@
 package ru.otus.mynotes
 
-import java.util.*
+import kotlinx.coroutines.flow.Flow
+import ru.otus.mynotes.database.NotesDao
+import ru.otus.mynotes.database.NotesDb
+import java.util.Date
+
+//class NotesRepository @Inject constructor(
+//    private val storage: NotesDb
+//)
 
 object NotesRepository {
-    private val notes: MutableList<Note> = mutableListOf()
 
-    fun getAllNotes(): List<Note> = notes
+    private val storage: NotesDao = NotesApplication.db.notesDao()
 
-    fun create(title: String, note: String) {
+    fun getAllNotes(): Flow<List<Note>> = storage.getAllNotes()
+
+    suspend fun create(title: String, note: String) {
         if (title.isBlank() && note.isBlank()) return
 
-        val maxId = notes.maxByOrNull { it.id }?.id ?: 0
         val newNote = Note(
-            id = maxId + 1,
+            id = 0,
             title = title,
             text = note,
             date = Date()
         )
-        notes.add(newNote)
+        storage.insert(newNote)
     }
 
-    fun update(note: Note) {
-        notes.replaceAll { if (it.id == note.id) note else it }
+    suspend fun update(note: Note) {
+        storage.update(note)
     }
 
-    fun get(id: Long): Note? = notes.firstOrNull { it.id == id }
+    suspend fun get(id: Long): Note? = storage.getNote(id)
 }
