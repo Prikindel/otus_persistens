@@ -12,11 +12,17 @@ import ru.otus.mynotes.NotesRepository
 class NotesListViewModel(
     private val repository: NotesRepository = NotesRepository
 ) : ViewModel() {
-    private val _viewState = MutableStateFlow<List<Note>>(emptyList())
+    private val _viewState : MutableStateFlow<NotesListViewState>
 
-    val viewState: Flow<List<Note>> get() = _viewState
+    val viewState: Flow<NotesListViewState> get() = _viewState
 
     init {
+        val state = NotesListViewState(
+            notes = emptyList(),
+            columnCount = 2
+        )
+
+        _viewState = MutableStateFlow(state)
         loadNotes()
     }
 
@@ -24,9 +30,13 @@ class NotesListViewModel(
         viewModelScope.launch {
             repository.getAllNotes()
                 .collect { notes ->
-                    _viewState.value = notes
+                    _viewState.value = _viewState.value.copy(notes = notes)
                 }
         }
+    }
+
+    fun onColumnCountChanged(count: Int) {
+        _viewState.value = _viewState.value.copy(columnCount = count)
     }
 
     fun onViewResumed() {
