@@ -8,9 +8,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import ru.otus.mynotes.NotesRepository
+import ru.otus.mynotes.references.SharedPreferencesProvider
 
 class NotesListViewModel(
-    private val repository: NotesRepository = NotesRepository
+    private val repository: NotesRepository = NotesRepository,
+    private val sharedPrefs: SharedPreferencesProvider = SharedPreferencesProvider
 ) : ViewModel() {
     private val _viewState : MutableStateFlow<NotesListViewState>
 
@@ -19,7 +21,7 @@ class NotesListViewModel(
     init {
         val state = NotesListViewState(
             notes = emptyList(),
-            columnCount = 2
+            columnCount = sharedPrefs.getColumnCount()
         )
 
         _viewState = MutableStateFlow(state)
@@ -37,6 +39,7 @@ class NotesListViewModel(
 
     fun onColumnCountChanged(count: Int) {
         _viewState.value = _viewState.value.copy(columnCount = count)
+        sharedPrefs.setColumnCount(count)
     }
 
     fun onViewResumed() {

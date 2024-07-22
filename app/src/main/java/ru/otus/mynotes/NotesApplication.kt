@@ -1,12 +1,15 @@
 package ru.otus.mynotes
 
 import android.app.Application
+import android.content.Context
 import androidx.room.Room
 import ru.otus.mynotes.database.NotesDb
 
 class NotesApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+
+        context = this
 
         db = Room.databaseBuilder(
             this,
@@ -17,6 +20,9 @@ class NotesApplication : Application() {
 
     companion object {
         lateinit var db: NotesDb
+            private set
+
+        lateinit var context: Context
             private set
     }
 
