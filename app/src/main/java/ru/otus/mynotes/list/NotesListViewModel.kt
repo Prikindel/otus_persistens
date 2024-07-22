@@ -2,29 +2,33 @@ package ru.otus.mynotes.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ru.otus.mynotes.Note
-import ru.otus.mynotes.oldNotesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import ru.otus.mynotes.NotesRepository
-import ru.otus.mynotes.references.SharedPreferencesProvider
+import ru.otus.mynotes.references.DataStoreProvider
 
 class NotesListViewModel(
     private val repository: NotesRepository = NotesRepository,
-    private val sharedPrefs: SharedPreferencesProvider = SharedPreferencesProvider
+    private val preferences: DataStoreProvider = DataStoreProvider
 ) : ViewModel() {
-    private val _viewState : MutableStateFlow<NotesListViewState>
+    private val _viewState : MutableStateFlow<NotesListViewState> =
+        MutableStateFlow(
+            NotesListViewState(
+                notes = emptyList(),
+                columnCount = 2
+            )
+        )
 
     val viewState: Flow<NotesListViewState> get() = _viewState
 
     init {
-        val state = NotesListViewState(
-            notes = emptyList(),
-            columnCount = sharedPrefs.getColumnCount()
-        )
+        viewModelScope.launch {
+            preferences.getColumnCount().collect { count ->
+                _viewState.value = _viewState.value.copy(columnCount = count)
+            }
+        }
 
-        _viewState = MutableStateFlow(state)
         loadNotes()
     }
 
@@ -39,7 +43,9 @@ class NotesListViewModel(
 
     fun onColumnCountChanged(count: Int) {
         _viewState.value = _viewState.value.copy(columnCount = count)
-        sharedPrefs.setColumnCount(count)
+        viewModelScope.launch {
+            preferences.setColumnCount(count)
+        }
     }
 
     fun onViewResumed() {

@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.core.content.edit
 import ru.otus.mynotes.NotesApplication
 
-private const val SHARED_PREFS = "shared_prefs"
-private const val KEY_COLUMN_COUNT = "key_column_count"
+const val SHARED_PREFS = "shared_prefs"
+const val KEY_COLUMN_COUNT = "key_column_count"
 private const val DEF_COLUMN_COUNT = 2
 
 object SharedPreferencesProvider {
